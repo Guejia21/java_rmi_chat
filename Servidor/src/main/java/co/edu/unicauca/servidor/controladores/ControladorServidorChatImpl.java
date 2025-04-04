@@ -56,7 +56,7 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     public void enviarMensajePrivado(String mensaje, String origen, String destinatario) throws RemoteException {
         System.out.println("Invocando al método enviar mensaje privado desde el servidor");
         for (UsuarioCllbckInt usuario : usuariosConectados.keySet()) {
-            if (usuariosConectados.get(usuario).equals(destinatario)) {
+            if (estaConectado(destinatario)) {
                 usuario.notificar("-"+origen+"(privado): " + mensaje, usuariosConectados.size());
             }
         }
