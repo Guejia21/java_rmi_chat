@@ -4,6 +4,7 @@ import co.edu.unicauca.cliente.controladores.UsuarioCllbckInt;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.List;
 
 public interface ControladorServidorChatInt extends Remote
 {

@@ -5,44 +5,80 @@ import co.edu.unicauca.cliente.controladores.UsuarioCllbckInt;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ControladorServidorChatImpl extends UnicastRemoteObject implements ControladorServidorChatInt {
-
-    private final List<UsuarioCllbckInt> usuarios;//lista que almacena la referencia remota de los clientes
-
+    //private final List<UsuarioCllbckInt> usuarios;//lista que almacena la referencia remota de los clientes
+    private final HashMap<UsuarioCllbckInt, String> usuariosConectados;//almacena el nombre de los usuarios conectados
     public ControladorServidorChatImpl() throws RemoteException
     {
         super();//asignamos el puerto 
-        usuarios= new ArrayList();
+        usuariosConectados = new HashMap<>();
     }
     
     @Override
-    public synchronized boolean  registrarReferenciaUsuario(UsuarioCllbckInt usuario) throws RemoteException 
+    public synchronized boolean  registrarReferenciaUsuario(UsuarioCllbckInt usuario, String nickname) throws RemoteException 
     {
        //método que unicamente puede ser accedido por un hilo
-	System.out.println("Invocando al método registrar usuario desde el servidor");
-        boolean bandera=false;
-        if (!usuarios.contains(usuario))
+	    System.out.println("Invocando al método registrar usuario desde el servidor");
+        if (!(usuariosConectados.containsValue(nickname) &&usuariosConectados.containsKey(usuario)))
         {
-            bandera=usuarios.add(usuario);  
-        }        
-        return bandera;       
+            return (null!=usuariosConectados.put(usuario, nickname));  
+        }          
+        return false;
     }
-   
+
     @Override
-    public void enviarMensaje(String mensaje)throws RemoteException 
+    public void enviarMensaje(String mensaje, String origen)throws RemoteException 
     {        
-        notificarUsuarios("un cliente envio el siguiente mensaje: " + mensaje);
+        notificarUsuarios("-"+origen+": " + mensaje);
     }
     
     private void notificarUsuarios(String mensaje) throws RemoteException 
     {
         System.out.println("Invocando al método notificar usuarios desde el servidor");
-        for(UsuarioCllbckInt objUsuario: usuarios)
-        {
-            objUsuario.notificar(mensaje, usuarios.size());//el servidor hace el callback
-            
+        for (UsuarioCllbckInt usuario : usuariosConectados.keySet()) {
+            usuario.notificar(mensaje, usuariosConectados.size());
         }
     }
-}
+
+    @Override
+    public List<String> listarUsuariosActivos() throws RemoteException {
+        List<String> nicknamesList = new ArrayList<>();
+        for (String nickname : usuariosConectados.values()) {
+            nicknamesList.add(nickname);
+        }
+        return nicknamesList;
+    }
+
+    @Override
+    public void enviarMensajePrivado(String mensaje, String origen, String destinatario) throws RemoteException {
+        System.out.println("Invocando al método enviar mensaje privado desde el servidor");
+        for (UsuarioCllbckInt usuario : usuariosConectados.keySet()) {
+            if (estaConectado(destinatario)) {
+                usuario.notificar("-"+origen+"(privado): " + mensaje, usuariosConectados.size());
+            }
+        }
+    }
+
+    @Override
+    public boolean desconectarse(String nickname) throws RemoteException {
+        System.out.println("Invocando al método desconectarse desde el servidor");
+        for(UsuarioCllbckInt usuario : usuariosConectados.keySet()) {
+            if (usuariosConectados.get(usuario).equals(nickname)) {
+                usuariosConectados.remove(usuario);
+                notificarUsuarios(nickname + " se ha desconectado.");
+                return true;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean estaConectado(String nickname) throws RemoteException {
+        System.out.println("Invocando al método estaConectado desde el servidor");
+        return usuariosConectados.containsValue(nickname);
+    }
+
+}    
