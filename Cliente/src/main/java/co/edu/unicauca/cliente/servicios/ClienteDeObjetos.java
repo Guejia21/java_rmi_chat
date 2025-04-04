@@ -4,27 +4,38 @@ import co.edu.unicauca.cliente.controladores.UsuarioCllbckImpl;
 import co.edu.unicauca.cliente.utilidades.UtilidadesConsola;
 import co.edu.unicauca.cliente.utilidades.UtilidadesRegistroC;
 import co.edu.unicauca.servidor.controladores.ControladorServidorChatInt;
+import java.rmi.RemoteException;
 import java.util.List;
 
 public class ClienteDeObjetos {
 
     public static void main(String[] args) {
 
+        ControladorServidorChatInt servidor;
+        int numPuertoRMIRegistry = 0;
+        String direccionIpRMIRegistry = "";
+        System.out.println("Cual es el la dirección ip donde se encuentra  el rmiregistry ");
+        direccionIpRMIRegistry = UtilidadesConsola.leerCadena();
+        System.out.println("Cual es el número de puerto por el cual escucha el rmiregistry ");
+        numPuertoRMIRegistry = UtilidadesConsola.leerEntero();
+        System.out.println("Digite su nickname: ");
+        String nickname = UtilidadesConsola.leerCadena();
         try {
-            ControladorServidorChatInt servidor;
-            int numPuertoRMIRegistry = 0;
-            String direccionIpRMIRegistry = "";
-            System.out.println("Cual es el la dirección ip donde se encuentra  el rmiregistry ");
-            direccionIpRMIRegistry = UtilidadesConsola.leerCadena();
-            System.out.println("Cual es el número de puerto por el cual escucha el rmiregistry ");
-            numPuertoRMIRegistry = UtilidadesConsola.leerEntero();
-            System.out.println("Digite su nickname: ");
-            String nickname = UtilidadesConsola.leerCadena();
             //Se conecta al objeto remoto
             servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
             //Se registra un usuario en el servidor
             UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
             servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname);
+            menu(nickname, servidor);
+        } catch (Exception e) {
+            System.out.println("No se pudo realizar la conexion...");
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    public static void menu(String nickname, ControladorServidorChatInt servidor) {
+        try {
             int opcion;
             do {
                 System.out.println("======Chat Grupal========");
@@ -44,25 +55,25 @@ public class ClienteDeObjetos {
                         String destinatario = UtilidadesConsola.leerCadena();
                         System.out.println("Ingrese el mensaje: ");
                         String mensaje = UtilidadesConsola.leerCadena();
-                        servidor.enviarMensajePrivado(mensaje, nickname,destinatario);
+                        servidor.enviarMensajePrivado(mensaje, nickname, destinatario);
                     }
                     case 3 -> {
                         List<String> usuariosActivos = servidor.listarUsuariosActivos();
                         System.out.println("Usuarios activos");
-                        for(String usuario: usuariosActivos){
-                            System.out.println("Nickname: "+usuario);
+                        for (String usuario : usuariosActivos) {
+                            System.out.println("Nickname: " + usuario);
                         }
                     }
                     case 4 -> {
-                        serv
+                        servidor.desconectarse(nickname);
                     }
                     default -> {
                         System.out.println("Opción inválida");
                     }
                 }
             } while (opcion != 4);
-        } catch (Exception e) {
-            System.out.println("No se pudo realizar la conexion...");
+        } catch (RemoteException e) {
+            System.out.println("No se pudo realizar el método.");
             System.out.println(e.getMessage());
         }
 
