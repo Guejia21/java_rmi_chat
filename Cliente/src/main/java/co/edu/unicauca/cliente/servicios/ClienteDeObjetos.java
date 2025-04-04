@@ -25,8 +25,10 @@ public class ClienteDeObjetos {
             servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
             //Se registra un usuario en el servidor
             UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
-            servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname);
-            menu(nickname, servidor);
+            if(servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname)){
+                menu(nickname, servidor);
+            }            
+            System.out.println("El nickname ya está en uso, por favor elija otro.");
         } catch (Exception e) {
             System.out.println("No se pudo realizar la conexion...");
             System.out.println(e.getMessage());
