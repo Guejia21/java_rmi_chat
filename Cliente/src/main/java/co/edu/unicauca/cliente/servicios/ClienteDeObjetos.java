@@ -18,22 +18,25 @@ public class ClienteDeObjetos {
         direccionIpRMIRegistry = UtilidadesConsola.leerCadena();
         System.out.println("Cual es el número de puerto por el cual escucha el rmiregistry ");
         numPuertoRMIRegistry = UtilidadesConsola.leerEntero();
-        System.out.println("Digite su nickname: ");
-        String nickname = UtilidadesConsola.leerCadena();
-        try {
-            //Se conecta al objeto remoto
-            servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
-            //Se registra un usuario en el servidor
-            UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
-            if(servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname)){
-                menu(nickname, servidor);
-            }            
-            System.out.println("El nickname ya está en uso, por favor elija otro.");
-        } catch (Exception e) {
-            System.out.println("No se pudo realizar la conexion...");
-            System.out.println(e.getMessage());
-        }
-
+        boolean bandera = true;
+        do{
+            System.out.println("Digite su nickname: ");
+            String nickname = UtilidadesConsola.leerCadena();
+            try {
+                //Se conecta al objeto remoto
+                servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
+                //Se registra un usuario en el servidor
+                UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
+                if(servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname)){
+                    menu(nickname, servidor);
+                    bandera = false;
+                }           
+                System.out.println("El nickname ya está en uso, por favor elija otro.");
+            } catch (Exception e) {
+                System.out.println("No se pudo realizar la conexion...");
+                System.out.println(e.getMessage());
+            }
+        }while(bandera);
     }
 
     public static void menu(String nickname, ControladorServidorChatInt servidor) {
