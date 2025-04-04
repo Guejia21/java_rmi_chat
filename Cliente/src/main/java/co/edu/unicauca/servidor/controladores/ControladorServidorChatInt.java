@@ -12,6 +12,7 @@ public interface ControladorServidorChatInt extends Remote
     public void enviarMensaje(String mensaje, String origen )throws RemoteException;
     //Revisar implementación de este método
     public List<String> listarUsuariosActivos() throws RemoteException;
+    public boolean desconectarse(String nickname) throws RemoteException;
 }
 
 

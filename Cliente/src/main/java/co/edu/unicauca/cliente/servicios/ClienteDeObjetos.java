@@ -4,6 +4,7 @@ import co.edu.unicauca.cliente.controladores.UsuarioCllbckImpl;
 import co.edu.unicauca.cliente.utilidades.UtilidadesConsola;
 import co.edu.unicauca.cliente.utilidades.UtilidadesRegistroC;
 import co.edu.unicauca.servidor.controladores.ControladorServidorChatInt;
+import java.util.List;
 
 public class ClienteDeObjetos {
 
@@ -46,10 +47,14 @@ public class ClienteDeObjetos {
                         servidor.enviarMensajePrivado(mensaje, nickname,destinatario);
                     }
                     case 3 -> {
-
+                        List<String> usuariosActivos = servidor.listarUsuariosActivos();
+                        System.out.println("Usuarios activos");
+                        for(String usuario: usuariosActivos){
+                            System.out.println("Nickname: "+usuario);
+                        }
                     }
                     case 4 -> {
-
+                        serv
                     }
                     default -> {
                         System.out.println("Opción inválida");
