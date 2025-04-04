@@ -74,4 +74,11 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         }
         return true;
     }
-}
+
+    @Override
+    public boolean estaConectado(String nickname) throws RemoteException {
+        System.out.println("Invocando al método estaConectado desde el servidor");
+        return usuariosConectados.containsValue(nickname);
+    }
+
+}    
