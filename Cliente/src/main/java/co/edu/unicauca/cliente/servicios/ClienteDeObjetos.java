@@ -34,10 +34,16 @@ public class ClienteDeObjetos {
                 opcion = UtilidadesConsola.leerEntero();
                 switch (opcion) {
                     case 1 -> {
-
+                        System.out.println("Ingrese el mensaje: ");
+                        String mensaje = UtilidadesConsola.leerCadena();
+                        servidor.enviarMensaje(mensaje, nickname);
                     }
                     case 2 -> {
-
+                        System.out.println("Ingrese el destinatario: ");
+                        String destinatario = UtilidadesConsola.leerCadena();
+                        System.out.println("Ingrese el mensaje: ");
+                        String mensaje = UtilidadesConsola.leerCadena();
+                        servidor.enviarMensajePrivado(mensaje, nickname,destinatario);
                     }
                     case 3 -> {
 
