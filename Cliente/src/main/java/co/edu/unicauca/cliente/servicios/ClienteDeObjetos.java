@@ -5,12 +5,12 @@ import co.edu.unicauca.cliente.utilidades.UtilidadesConsola;
 import co.edu.unicauca.cliente.utilidades.UtilidadesRegistroC;
 import co.edu.unicauca.servidor.controladores.ControladorServidorChatInt;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
 public class ClienteDeObjetos {
 
     public static void main(String[] args) {
-
         ControladorServidorChatInt servidor;
         int numPuertoRMIRegistry = 0;
         String direccionIpRMIRegistry = "";
@@ -19,24 +19,25 @@ public class ClienteDeObjetos {
         System.out.println("Cual es el número de puerto por el cual escucha el rmiregistry ");
         numPuertoRMIRegistry = UtilidadesConsola.leerEntero();
         boolean bandera = true;
-        do{
-            System.out.println("Digite su nickname: ");
-            String nickname = UtilidadesConsola.leerCadena();
-            try {
-                //Se conecta al objeto remoto
-                servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
-                //Se registra un usuario en el servidor
-                UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
-                if(servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname)){
-                    menu(nickname, servidor);
-                    bandera = false;
-                }           
+        System.out.println("Digite su nickname: ");
+        String nickname = UtilidadesConsola.leerCadena();
+        try {
+            //Se conecta al objeto remoto
+            servidor = (ControladorServidorChatInt) UtilidadesRegistroC.obtenerObjRemoto(numPuertoRMIRegistry, direccionIpRMIRegistry, "ServidorChat");
+            //Se registra un usuario en el servidor
+            UsuarioCllbckImpl objNuevoUsuario = new UsuarioCllbckImpl();
+            if(servidor.registrarReferenciaUsuario(objNuevoUsuario, nickname)){
+                menu(nickname, servidor);
+                bandera = false;
+            }else{
                 System.out.println("El nickname ya está en uso, por favor elija otro.");
-            } catch (Exception e) {
-                System.out.println("No se pudo realizar la conexion...");
-                System.out.println(e.getMessage());
             }
-        }while(bandera);
+            //Esta linea desconecta el cliente del servidor
+            UnicastRemoteObject.unexportObject(objNuevoUsuario, true);           
+        } catch (Exception e) {
+            System.out.println("No se pudo realizar la conexion...");
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void menu(String nickname, ControladorServidorChatInt servidor) {
@@ -71,6 +72,7 @@ public class ClienteDeObjetos {
                     }
                     case 4 -> {
                         servidor.desconectarse(nickname);
+                        System.out.println("Desconectado del chat ...");
                     }
                     default -> {
                         System.out.println("Opción inválida");

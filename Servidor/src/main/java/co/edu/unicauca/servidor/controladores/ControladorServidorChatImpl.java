@@ -40,6 +40,8 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     {
         System.out.println("Invocando al método notificar usuarios desde el servidor");
         for (UsuarioCllbckInt usuario : usuariosConectados.values()) {
+            //Enviamos a tdos los usuarios el mensaje, menos a si mismo
+
             usuario.notificar(mensaje, usuariosConectados.size());
         }
     }
