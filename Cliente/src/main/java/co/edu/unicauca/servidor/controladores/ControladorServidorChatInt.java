@@ -14,6 +14,7 @@ public interface ControladorServidorChatInt extends Remote
     //Revisar implementación de este método
     public List<String> listarUsuariosActivos() throws RemoteException;
     public boolean desconectarse(String nickname) throws RemoteException;
+    public boolean estaConectado(String nickname) throws RemoteException;
 }
 
 

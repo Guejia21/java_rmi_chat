@@ -21,10 +21,10 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     public synchronized boolean registrarReferenciaUsuario(UsuarioCllbckInt usuario, String nickname) throws RemoteException 
     {
        //método que unicamente puede ser accedido por un hilo
-	    System.out.println("Invocando al método registrar usuario desde el servidor");
+	    System.err.println("Invocando al método registrar usuario desde el servidor");
         if (!(usuariosConectados.containsValue(usuario) &&usuariosConectados.containsKey(nickname)))
         {
-            System.out.println("Verificando si existe el nickname");
+            System.err.println("Verificando si existe el nickname");
             return (null==usuariosConectados.put(nickname,usuario));  
         }          
         return false;
@@ -33,14 +33,17 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     @Override
     public void enviarMensaje(String mensaje, String origen)throws RemoteException 
     {        
-        notificarUsuarios("-"+origen+": " + mensaje);
+        notificarUsuarios("-"+origen+": " + mensaje, origen);
     }
     
-    private void notificarUsuarios(String mensaje) throws RemoteException 
+    private void notificarUsuarios(String mensaje, String origen) throws RemoteException 
     {
         System.out.println("Invocando al método notificar usuarios desde el servidor");
-        for (UsuarioCllbckInt usuario : usuariosConectados.values()) {
-            usuario.notificar(mensaje, usuariosConectados.size());
+        for (String nickname : usuariosConectados.keySet()) {
+            if(!nickname.equals(origen)){
+                UsuarioCllbckInt usuario = usuariosConectados.get(nickname);
+                usuario.notificar(mensaje, usuariosConectados.size());
+            }
         }
     }
 
@@ -56,9 +59,11 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     @Override
     public void enviarMensajePrivado(String mensaje, String origen, String destinatario) throws RemoteException {
         System.out.println("Invocando al método enviar mensaje privado desde el servidor");
-        if (estaConectado(destinatario)) {
+        if (!origen.equals(destinatario)) {
             UsuarioCllbckInt usuarioDestinatario = usuariosConectados.get(destinatario);
             usuarioDestinatario.notificar("-"+origen+"(privado): " + mensaje, usuariosConectados.size());
+        }else{
+            System.out.println("No se puede enviar un mensaje privado a uno mismo.");
         }
     }
 
@@ -68,7 +73,7 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         for(String usuario : usuariosConectados.keySet()) {
             if (nickname.equals(usuario)) {
                 usuariosConectados.remove(nickname);
-                notificarUsuarios(nickname + " se ha desconectado.");
+                notificarUsuarios(nickname + " se ha desconectado.", nickname);
                 return true;
             }
         }
