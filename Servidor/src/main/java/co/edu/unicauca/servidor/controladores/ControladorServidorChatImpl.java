@@ -33,15 +33,17 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     @Override
     public void enviarMensaje(String mensaje, String origen)throws RemoteException 
     {        
-        notificarUsuarios("-"+origen+": " + mensaje);
+        notificarUsuarios(origen,"-"+origen+": " + mensaje);
     }
     
-    private void notificarUsuarios(String mensaje) throws RemoteException 
+    private void notificarUsuarios(String origen, String mensaje) throws RemoteException 
     {
         System.out.println("Invocando al método notificar usuarios desde el servidor");
         for (UsuarioCllbckInt usuario : usuariosConectados.values()) {
             //Enviamos a tdos los usuarios el mensaje, menos a si mismo
-
+            if (usuario.equals(usuariosConectados.get(origen))) {
+                continue;
+            }
             usuario.notificar(mensaje, usuariosConectados.size());
         }
     }
@@ -59,8 +61,11 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     public void enviarMensajePrivado(String mensaje, String origen, String destinatario) throws RemoteException {
         System.out.println("Invocando al método enviar mensaje privado desde el servidor");
         if (estaConectado(destinatario)) {
+            System.out.println("Enviando mensajes a usuario conectado");
             UsuarioCllbckInt usuarioDestinatario = usuariosConectados.get(destinatario);
             usuarioDestinatario.notificar("-"+origen+"(privado): " + mensaje, usuariosConectados.size());
+        }else{
+            System.out.println("El usuario "+destinatario+" no está conectado.");
         }
     }
 
@@ -70,7 +75,7 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         for(String usuario : usuariosConectados.keySet()) {
             if (nickname.equals(usuario)) {
                 usuariosConectados.remove(nickname);
-                notificarUsuarios(nickname + " se ha desconectado.");
+                notificarUsuarios(nickname, nickname + " se ha desconectado.");
                 return true;
             }
         }
